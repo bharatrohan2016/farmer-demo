@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <title>Farmer Map</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css"/>
+  <script type="text/javascript" src="dist/leaflet-control-credits.js"></script>
+  <link rel="stylesheet" href="dist/leaflet-control-credits.css" />
+
+  <script src="data/geojson/ranjeet_verma.geojson"></script>
+</head>
+
+<style>
+body {
+    padding: 0;
+    margin: 0;
+}
+html, body, #map {
+    height: 100%;
+    width: 100vw;
+}
+</style>
+
+<style>body { padding: 0; margin: 0; } #map { height: 100%; width: 100vw; }</style>
+
+<style>
+.info { 
+  padding: 6px 8px; 
+  font: 14px/16px Arial, Helvetica, sans-serif; 
+  background: white; 
+  background: rgba(255,255,255,0.8); 
+  box-shadow: 0 0 15px rgba(0,0,0,0.2); 
+  border-radius: 5px; 
+} 
+
+.info h4 { 
+  margin: 0 0 5px; 
+  color: #777; 
+}
+
+.legend { 
+  text-align: left; 
+  line-height: 18px; 
+  color: #555; 
+} 
+
+.legend i { 
+  width: 18px; 
+  height: 18px; 
+  float: left; 
+  margin-right: 8px; 
+  opacity: 0.7; 
+}
+</style>
+
+<body>
+	<div id="map"></div>
+</body>
+    
+<script>
+
+  var mapOptions = {
+    center: [26.95616111, 81.47955556],
+    zoom: 30,
+    attributionControl: false,
+    scale: true
+  }
+
+  // Defining the layers
+  var map = L.map('map', mapOptions);
+  var esriLayer = new L.tileLayer('https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+  var geojsonLayer = L.geoJson(ranjeet).addTo(map);
+  var rasterLayer_1 = L.tileLayer.wms("http://localhost:8080/geoserver/ne/wms", {
+    layers: 'Survey_1',
+    format: 'image/png',
+    transparent: true,
+    attribution: "Ranjeet Verma S1"
+  });
+  var rasterLayer_2 = L.tileLayer.wms("http://localhost:8080/geoserver/ne/wms", {
+    layers: 'Survey_2',
+    format: 'image/png',
+    transparent: true,
+    attribution: "Ranjeet Verma S2"
+  });
+  var rasterLayer_3 = L.tileLayer.wms("http://localhost:8080/geoserver/ne/wms", {
+    layers: 'Survey_3',
+    format: 'image/png',
+    transparent: true,
+    attribution: "Ranjeet Verma S3"
+  });
+
+ 
+
+
+  // Creating Layer Group
+  var Layers = L.layerGroup([esriLayer]);
+
+  var baseMaps = {
+    "<span style='color: red'>Satellite Imagery</span>": esriLayer,
+  };
+  
+  var overlayMaps = {
+    "Nutrient Map": rasterLayer_3,
+    "Disease Map": rasterLayer_1,
+    "Pest Map": rasterLayer_2
+    
+  };
+
+  
+
+  // Creating Layer Control
+ const layersControl =  L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+
+
+  // Adding Default Layer to the map
+  map.addLayer(esriLayer);
+
+
+  const legends ={
+    survey1 : ['Healthy', 'kandua rog', 'Dead, Leaf and Other Residues'],
+    survey2 : ['Healthy', 'Precut', 'Dead, Leaf and Other Residues'],
+    survey3 : ['Mature', 'Immature', 'Dead, Leaf and Other Residues' ]
+  };
+
+
+  // Function to add event listeners to the checkboxes after the control is added to the map
+  function addCheckboxListeners() {
+    var layersContainer = layersControl.getContainer();
+    var inputs = layersContainer.getElementsByTagName('input');
+    
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener('change', function(e) {
+        const text = e.target.nextSibling.innerText.trim();
+        switch(text) {
+          case "Disease Map":
+            if (e.target.checked) {
+              addLegend(['Healthy', 'False Smut', 'Bare Soil/Water'], "19/02/2024");
+            } else {
+              addLegend([]);
+            }
+            break;
+          case "Pest Map":
+            if (e.target.checked) {
+              addLegend(['Healthy', 'Aphids', 'Bare Soil/Water'], "19/03/2024");
+            } else {
+              addLegend([]);
+            }
+            break;
+          case "Nutrient Map":
+            if (e.target.checked) {
+              addLegend(['Healthy', 'Zinc Deficiency', 'Bare Soil/Water'], "20/02/2024");
+            } else {
+              addLegend([]);
+            }
+            break;
+        }
+      });
+    }
+  }
+  
+
+
+  // Ensure that the function runs after the control is fully loaded
+  map.on('overlayadd overlayremove', addCheckboxListeners);
+
+  // Defining Custom icons options
+  //var iconOptions = {
+  //  iconUrl: 'data/icon/gps.png',
+  //  iconSize: [25, 45]
+  //}
+
+  // Creating a custom icon
+  //var customIcon = L.icon(iconOptions);
+  //var markerOptions = {
+   // title: "BharatRohan",
+  //  clickable: true,
+  //  draggable: false,
+  //  icon: customIcon
+//}
+
+  //
+  //var marker = L.marker([26.95616111, 81.47955556], markerOptions).addTo(map);
+
+  //
+ // var popup = marker.bindPopup(
+  //  '<b><center>BharatRohan Airborne Innovations</center></b> <div> <img style="width:100%" src="./br.svg" alt="image" </div>', {
+//minWidth: 256
+//});
+   
+  function addLegend(legendItems, dates) {
+    // Remove existing legend
+    const existingLegend = document.querySelector('.info.legend');
+    if (existingLegend) {
+      existingLegend.parentNode.removeChild(existingLegend);
+    }
+  
+    // Only add a new legend if there are items to display
+    if (legendItems && legendItems.length > 0) {
+      const legend = L.control({ position: 'bottomleft' });
+      legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        // Adjust the colors here as per the number of visual distinctions you want
+       
+        const labels = [
+          `<i style="background:#1a9641"></i> ${legendItems[0]}`,
+          `<i style="background:#60b856"></i>`,  
+          `<i style="background:#a6d96a"></i>`, 
+          `<i style="background:#d3ec95"></i>`,  
+          `<i style="background:#ffffc0"></i> ${legendItems[1]}`,  
+          `<i style="background:#fed791"></i>`, 
+          `<i style="background:#fdae61"></i>`,
+          `<i style="background:#ea643F"></i> `,
+          `<i style="background:#d7191c"></i> ${legendItems[2]}`
+        ];
+        div.innerHTML = labels.join('<br>');
+        return div;
+      };
+      legend.addTo(map);
+    }
+  }
+  
+  //
+  var credits = L.controlCredits({
+    imageurl: './br.svg',
+    imagealt: 'BharatRohan',
+    tooltip: 'Made by BharatRohan',
+    width: '45px',
+    height: '45px',
+    expandcontent: 'Farmer Map<br/>by <a href="https://www.bharatrohan.in/" target="_blank">BharatRohan</a>',
+  }).addTo(map);
+
+</script>
+</html>
