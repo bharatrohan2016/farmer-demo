@@ -110,13 +110,67 @@ html, body, #map {
     "Nutrient Map": rasterLayer_3,
     "Disease Map": rasterLayer_1,
     "Pest Map": rasterLayer_2
-    
   };
 
   
+   // Custom control for overlay selection with radio buttons
+   var customControl = L.Control.extend({
+    options: {
+      position: 'topright'
+    },
+
+    onAdd: function (map) {
+      var container = L.DomUtil.create('div', 'layer-control');
+      container.style.backgroundColor = 'white';
+      container.style.padding = '10px';
+
+      var p = L.DomUtil.create('p', '', container);
+      p.innerHTML = "Select Layers";
+      p.style.fontSize = '14px';
+      p.style.margin = 0;
+
+      var form = L.DomUtil.create('form', '', p);
+      
+      Object.keys(overlayMaps).forEach(function (key) {
+       
+        var input = L.DomUtil.create('input', '', form);
+        input.type = 'radio';
+        input.name = 'overlayControl';
+        input.value = key;
+        input.style.marginTop = '8px';
+
+        input.onchange = function () {
+          Object.values(overlayMaps).forEach(layer => map.removeLayer(layer));
+          
+          map.addLayer(overlayMaps[this.value]);
+
+          handleLegends(this.value);
+
+        };
+
+        var label = L.DomUtil.create('label', '', form);
+        label.innerHTML = key;
+
+        label.style.fontSize = '13px';
+        label.style.margin = '5px';
+
+        label.insertBefore(input, label.firstChild);
+         form.appendChild(label); // Append label to the form
+
+        var br = L.DomUtil.create('br', '', form);
+        form.appendChild(br); // Append a line break after each label
+      });
+
+      return container;
+    }
+  });
+
+  L.control.layers(baseMaps).addTo(map);
+  map.addControl(new customControl());
+  
 
   // Creating Layer Control
- const layersControl =  L.control.layers(baseMaps, overlayMaps).addTo(map);
+ //const layersControl =  L.control.layers(baseMaps, overlayMaps).addTo(map);
 
 
 
@@ -132,44 +186,24 @@ html, body, #map {
 
 
   // Function to add event listeners to the checkboxes after the control is added to the map
-  function addCheckboxListeners() {
-    var layersContainer = layersControl.getContainer();
-    var inputs = layersContainer.getElementsByTagName('input');
-    
-    for (var i = 0; i < inputs.length; i++) {
-      inputs[i].addEventListener('change', function(e) {
-        const text = e.target.nextSibling.innerText.trim();
-        switch(text) {
+  function handleLegends(value) {
+        switch(value) {
           case "Disease Map":
-            if (e.target.checked) {
-              addLegend(['Healthy', 'False Smut', 'Bare Soil/Water'], "19/02/2024");
-            } else {
-              addLegend([]);
-            }
+          addLegend(['Healthy', 'False Smut', 'Bare Soil/Water'], "19/02/2024");
             break;
           case "Pest Map":
-            if (e.target.checked) {
-              addLegend(['Healthy', 'Aphids', 'Bare Soil/Water'], "19/03/2024");
-            } else {
-              addLegend([]);
-            }
+          addLegend(['Healthy', 'Aphids', 'Bare Soil/Water'], "19/03/2024");
             break;
           case "Nutrient Map":
-            if (e.target.checked) {
-              addLegend(['Healthy', 'Zinc Deficiency', 'Bare Soil/Water'], "20/02/2024");
-            } else {
-              addLegend([]);
-            }
+          addLegend(['Healthy', 'Zinc Deficiency', 'Bare Soil/Water'], "20/02/2024");
             break;
         }
-      });
-    }
   }
   
 
 
   // Ensure that the function runs after the control is fully loaded
-  map.on('overlayadd overlayremove', addCheckboxListeners);
+ // map.on('overlayadd overlayremove', addCheckboxListeners);
 
   // Defining Custom icons options
   //var iconOptions = {
@@ -234,7 +268,7 @@ html, body, #map {
     tooltip: 'Made by BharatRohan',
     width: '45px',
     height: '45px',
-    expandcontent: 'Farmer Map<br/>by <a href="https://www.bharatrohan.in/" target="_blank">BharatRohan</a>',
+    expandcontent: 'Prescription Maps<br/>by <a href="https://www.bharatrohan.in/" target="_blank">BharatRohan</a>',
   }).addTo(map);
 
 </script>
