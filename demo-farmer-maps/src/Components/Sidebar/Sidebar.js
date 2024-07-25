@@ -20,19 +20,19 @@ const Sidebar = ({isSidebarOpen}) => {
                 <li className='nav-item'>
                     <Link className="nav-link" to="/farmers">
                     <i className="typcn typcn-map menu-icon"></i>
-                    <span className="menu-title">Locations</span>
+                    <span className="menu-title">Polygon Mapping</span>
                     </Link>
                 </li>
                 <li className='nav-item'>
                     <Link className="nav-link" to="/farmers">
                     <i className="typcn typcn-leaf menu-icon"></i>
-                    <span className="menu-title">Crops Manage</span>
+                    <span className="menu-title">Crop Information</span>
                     </Link>
                 </li>
                 <li className='nav-item'>
                     <Link className="nav-link" to="/farmers">
                     <i className="typcn typcn-support menu-icon"></i>
-                    <span className="menu-title">Pests Manage</span>
+                    <span className="menu-title">Pest Manage</span>
                     </Link>
                 </li>
             </ul>

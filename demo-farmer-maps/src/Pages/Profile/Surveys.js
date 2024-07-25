@@ -55,7 +55,7 @@ const handleNavigation = () => {
 
         <h4 className='mt-4'>Maps</h4>
         <p>Kindly Navigate to next page for the maps.</p>
-        <a href="http://localhost:3200/maps/index.html" target="_blank">Navigate to Maps <i className='typcn typcn-export'></i></a>
+        <a href="/geo/index.html" target="_blank">Navigate to Maps <i className='typcn typcn-export'></i></a>
 
     </div>
 
